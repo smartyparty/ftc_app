@@ -84,20 +84,26 @@ public class TeleOpMode extends OpMode
     @Override
     public void loop() {
         telemetry.addData("Status", "Running: " + runtime.toString());
-        left1MotorPower = -(Range.clip(gamepad1.left_stick_y,-1.0,1.0));
-        left2MotorPower = -(Range.clip(gamepad1.right_stick_y,-1.0,1.0));
-        right1MotorPower = -(Range.clip(gamepad1.right_stick_y,-1.0,1.0));
-        right2MotorPower = -(Range.clip(gamepad1.left_stick_y,-1.0,1.0));
 
-         //eg: Run wheels in tank mode (note: The joystick goes negative when pushed forwards)
-//        left1Motor.setPower(-gamepad1.left_stick_y);
-//        right1Motor.setPower(-gamepad1.right_stick_y);
-//        left2Motor.setPower(-gamepad1.right_stick_y);
-//        right2Motor.setPower(-gamepad1.left_stick_y);
+        if (gamepad1.left_trigger > 0) {
+            //mecanum mode
+            left1MotorPower = -(Range.clip(gamepad1.left_stick_y,-1.0,1.0));
+            left2MotorPower = -(Range.clip(gamepad1.right_stick_y,-1.0,1.0));
+            right1MotorPower = -(Range.clip(gamepad1.right_stick_y,-1.0,1.0));
+            right2MotorPower = -(Range.clip(gamepad1.left_stick_y,-1.0,1.0));
+        } else {
+            //tank mode
+            left1MotorPower = -(Range.clip(gamepad1.left_stick_y,-1.0,1.0));
+            left2MotorPower = -(Range.clip(gamepad1.left_stick_y,-1.0,1.0));
+            right1MotorPower = -(Range.clip(gamepad1.right_stick_y,-1.0,1.0));
+            right2MotorPower = -(Range.clip(gamepad1.right_stick_y,-1.0,1.0));
+        }
+
         left1Motor.setPower(left1MotorPower);
         right1Motor.setPower(right1MotorPower);
         left2Motor.setPower(left2MotorPower);
         right2Motor.setPower(right2MotorPower);
+
     }
 
 
