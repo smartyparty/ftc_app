@@ -38,7 +38,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
+import com.qualcomm.robotcore.util.Range;
 
 
 @TeleOp(name="TeleOpMode", group="Iterative")  // @Autonomous(...) is the other common choice
@@ -50,7 +50,10 @@ public class TeleOpMode extends OpMode
     private DcMotor right1Motor = null;
     private DcMotor left2Motor = null;
     private DcMotor right2Motor = null;
-
+    private double left1MotorPower = 0.0;
+    private double right1MotorPower = 0.0;
+    private double left2MotorPower = 0.0;
+    private double right2MotorPower = 0.0;
 
     @Override
     public void init() {
@@ -81,12 +84,20 @@ public class TeleOpMode extends OpMode
     @Override
     public void loop() {
         telemetry.addData("Status", "Running: " + runtime.toString());
+        left1MotorPower = -(Range.clip(gamepad1.left_stick_y,-1.0,1.0));
+        left2MotorPower = -(Range.clip(gamepad1.right_stick_y,-1.0,1.0));
+        right1MotorPower = -(Range.clip(gamepad1.right_stick_y,-1.0,1.0));
+        right2MotorPower = -(Range.clip(gamepad1.left_stick_y,-1.0,1.0));
 
          //eg: Run wheels in tank mode (note: The joystick goes negative when pushed forwards)
-        left1Motor.setPower(-gamepad1.left_stick_y);
-        right1Motor.setPower(-gamepad1.right_stick_y);
-        left2Motor.setPower(-gamepad1.right_stick_y);
-        right2Motor.setPower(-gamepad1.left_stick_y);
+//        left1Motor.setPower(-gamepad1.left_stick_y);
+//        right1Motor.setPower(-gamepad1.right_stick_y);
+//        left2Motor.setPower(-gamepad1.right_stick_y);
+//        right2Motor.setPower(-gamepad1.left_stick_y);
+        left1Motor.setPower(left1MotorPower);
+        right1Motor.setPower(right1MotorPower);
+        left2Motor.setPower(left2MotorPower);
+        right2Motor.setPower(right2MotorPower);
     }
 
 
