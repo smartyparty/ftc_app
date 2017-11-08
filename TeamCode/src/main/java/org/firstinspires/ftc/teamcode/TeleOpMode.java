@@ -64,8 +64,8 @@ public class TeleOpMode extends OpMode
         left2Motor = hardwareMap.dcMotor.get("left_back_motor");
         right2Motor = hardwareMap.dcMotor.get("right_back_motor");
 
-        left1Motor.setDirection(DcMotor.Direction.REVERSE);
-        right1Motor.setDirection(DcMotor.Direction.FORWARD);
+        left1Motor.setDirection(DcMotor.Direction.FORWARD);
+        right1Motor.setDirection(DcMotor.Direction.REVERSE);
         left2Motor.setDirection(DcMotor.Direction.FORWARD);
         right2Motor.setDirection(DcMotor.Direction.REVERSE);
         telemetry.addData("Status", "Initialized");
