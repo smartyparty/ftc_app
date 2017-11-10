@@ -85,19 +85,14 @@ public class TeleOpMode extends OpMode
     public void loop() {
         telemetry.addData("Status", "Running: " + runtime.toString());
 
-        if (gamepad1.left_trigger > 0) {
-            //mecanum mode
-            left1MotorPower = -(Range.clip(gamepad1.left_stick_y,-1.0,1.0));
-            left2MotorPower = -(Range.clip(gamepad1.right_stick_y,-1.0,1.0));
-            right1MotorPower = -(Range.clip(gamepad1.right_stick_y,-1.0,1.0));
-            right2MotorPower = -(Range.clip(gamepad1.left_stick_y,-1.0,1.0));
-        } else {
-            //tank mode
-            left1MotorPower = -(Range.clip(gamepad1.left_stick_y,-1.0,1.0));
-            left2MotorPower = -(Range.clip(gamepad1.left_stick_y,-1.0,1.0));
-            right1MotorPower = -(Range.clip(gamepad1.right_stick_y,-1.0,1.0));
-            right2MotorPower = -(Range.clip(gamepad1.right_stick_y,-1.0,1.0));
-        }
+        double x1 = Range.clip(-gamepad1.left_stick_x, -1, 1);
+        double x2 = Range.clip(-gamepad1.right_stick_x, -1, 1);
+        double y1 = Range.clip(-gamepad1.left_stick_y, -1, 1);
+        double y2 = Range.clip(-gamepad1.right_stick_y, -1,1);
+        right1MotorPower = y1 -x2 - x1;
+        right2MotorPower =  y1 - x2 + x1;
+        left1MotorPower = y1 + x2 + x1;
+        left2MotorPower = y1 + x2 - x1;
 
         left1Motor.setPower(left1MotorPower);
         right1Motor.setPower(right1MotorPower);
