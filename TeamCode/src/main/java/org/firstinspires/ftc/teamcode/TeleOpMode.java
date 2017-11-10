@@ -44,6 +44,10 @@ import com.qualcomm.robotcore.util.Range;
 @TeleOp(name="TeleOpMode", group="Iterative")  // @Autonomous(...) is the other common choice
 public class TeleOpMode extends OpMode
 {
+    // Port 0 = left_front_drive
+    // Port 1 = right_front_drive
+    // Port 2 = left_back_motor
+    // Port 3 = right_back_motor
     /* Declare OpMode members. */
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor left1Motor = null;
@@ -54,6 +58,11 @@ public class TeleOpMode extends OpMode
     private double right1MotorPower = 0.0;
     private double left2MotorPower = 0.0;
     private double right2MotorPower = 0.0;
+
+    private final double HIGH_POWER = 0.8;
+    private final double LOW_POWER = 0.3;
+    private double power_factor = HIGH_POWER;
+
 
     @Override
     public void init() {
@@ -85,10 +94,17 @@ public class TeleOpMode extends OpMode
     public void loop() {
         telemetry.addData("Status", "Running: " + runtime.toString());
 
-        double x1 = Range.clip(-gamepad1.left_stick_x, -1, 1);
-        double x2 = Range.clip(-gamepad1.right_stick_x, -1, 1);
-        double y1 = Range.clip(-gamepad1.left_stick_y, -1, 1);
-        double y2 = Range.clip(-gamepad1.right_stick_y, -1,1);
+        power_factor = (gamepad1.left_bumper ? LOW_POWER : HIGH_POWER);
+
+        // Left Stick X
+        double x1 = Range.clip(gamepad1.left_stick_x, -1, 1) * power_factor;
+        // Right Stick X
+        double x2 = Range.clip(gamepad1.right_stick_x, -1, 1) * power_factor;
+        // Left Stick Y
+        double y1 = Range.clip(-gamepad1.left_stick_y, -1, 1) * power_factor;
+        // Right Stick Y
+        double y2 = Range.clip(-gamepad1.right_stick_y, -1,1) * power_factor;
+
         right1MotorPower = y1 -x2 - x1;
         right2MotorPower =  y1 - x2 + x1;
         left1MotorPower = y1 + x2 + x1;
