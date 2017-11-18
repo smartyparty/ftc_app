@@ -42,6 +42,7 @@ import com.qualcomm.robotcore.util.Range;
 
 
 @TeleOp(name="TeleOpMode", group="Iterative")  // @Autonomous(...) is the other common choice
+@Disabled
 public class TeleOpMode extends OpMode
 {
     // Port 0 = left_front_drive
