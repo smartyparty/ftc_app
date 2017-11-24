@@ -37,6 +37,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -60,24 +61,36 @@ public class TeleOpMode extends OpMode
     private double left2MotorPower = 0.0;
     private double right2MotorPower = 0.0;
 
-    private final double HIGH_POWER = 0.8;
-    private final double LOW_POWER = 0.3;
-    private double power_factor = HIGH_POWER;
+    private final double DRIVE_HIGH_POWER = 0.8;
+    private final double DRIVE_LOW_POWER = 0.3;
+    private double drive_power_factor = DRIVE_HIGH_POWER;
+
+    private final double ELEVATOR_POWER = 0.5;
+    private final double ROTATOR_POWER = 0.5;
+    private final double FLIPPER_POWER = 0.5;
+    private final double EXTENDER_POWER = 0.5;
+
+    private Servo elevator1 = null;         //Arm elevator motor 1
+    private Servo elevator2 = null;         //Arm elevator motor 2
+
+    private final double elevator_tolerance = 0.0;
+    private final double elevator_degrees_per_count = 0;
+    private final double elevator_min_pos = 0;
+    private final double elevator_max_pos = 0;
+    private double elevator1_prev_pos = 0.0;
+    private double elevator2_prev_pos = 0.0;
+
+    private Servo extender = null;          //Linear extender
+    private Servo rotator = null;           //Rotates to select grabber or cup
+    private Servo flipper = null;           //Stows/extends grabber/cup
 
 
     @Override
     public void init() {
-        telemetry.addData("Status", "Initialized");
+        init_drive();
 
-        left1Motor  = hardwareMap.dcMotor.get("left_front_drive");
-        right1Motor = hardwareMap.dcMotor.get("right_front_drive");
-        left2Motor = hardwareMap.dcMotor.get("left_back_motor");
-        right2Motor = hardwareMap.dcMotor.get("right_back_motor");
+        init_elevator();
 
-        left1Motor.setDirection(DcMotor.Direction.REVERSE);
-        right1Motor.setDirection(DcMotor.Direction.FORWARD);
-        left2Motor.setDirection(DcMotor.Direction.REVERSE);
-        right2Motor.setDirection(DcMotor.Direction.FORWARD);
         telemetry.addData("Status", "Initialized");
     }
 
@@ -95,18 +108,50 @@ public class TeleOpMode extends OpMode
     public void loop() {
         telemetry.addData("Status", "Running: " + runtime.toString());
 
-        power_factor = (gamepad1.left_bumper ? LOW_POWER : HIGH_POWER);
+        get_drive_input();
+    }
+
+    protected void init_elevator() {
+        elevator1 = hardwareMap.servo.get("elevator1");
+        elevator2 = hardwareMap.servo.get("elevator2");
+
+        elevator1.setDirection(Servo.Direction.REVERSE);
+        elevator2.setDirection(Servo.Direction.FORWARD);
+
+        telemetry.addData("Status", "Elevators Initialized");
+    }
+
+    protected void init_drive(){
+        left1Motor  = hardwareMap.dcMotor.get("left_front_drive");
+        right1Motor = hardwareMap.dcMotor.get("right_front_drive");
+        left2Motor = hardwareMap.dcMotor.get("left_back_motor");
+        right2Motor = hardwareMap.dcMotor.get("right_back_motor");
+
+        left1Motor.setDirection(DcMotor.Direction.REVERSE);
+        right1Motor.setDirection(DcMotor.Direction.FORWARD);
+        left2Motor.setDirection(DcMotor.Direction.REVERSE);
+        right2Motor.setDirection(DcMotor.Direction.FORWARD);
+
+        telemetry.addData("Status", "Drive Initialized");
+    }
+
+    protected void get_elevator_input() {
+
+    }
+
+    protected void get_drive_input() {
+        drive_power_factor = (gamepad1.left_bumper ? DRIVE_LOW_POWER : DRIVE_HIGH_POWER);
 
         // Left Stick X
-        double x1 = Range.clip(gamepad1.left_stick_x, -1, 1) * power_factor;
+        double x1 = Range.clip(gamepad1.left_stick_x, -1, 1) * drive_power_factor;
         // Right Stick X
-        double x2 = Range.clip(gamepad1.right_stick_x, -1, 1) * power_factor;
+        double x2 = Range.clip(gamepad1.right_stick_x, -1, 1) * drive_power_factor;
         // Left Stick Y
-        double y1 = Range.clip(-gamepad1.left_stick_y, -1, 1) * power_factor;
+        double y1 = Range.clip(-gamepad1.left_stick_y, -1, 1) * drive_power_factor;
         // Right Stick Y
-        double y2 = Range.clip(-gamepad1.right_stick_y, -1,1) * power_factor;
+        double y2 = Range.clip(-gamepad1.right_stick_y, -1,1) * drive_power_factor;
 
-        right1MotorPower = y1 -x2 - x1;
+        right1MotorPower = y1 - x2 - x1;
         right2MotorPower =  y1 - x2 + x1;
         left1MotorPower = y1 + x2 + x1;
         left2MotorPower = y1 + x2 - x1;
@@ -115,9 +160,7 @@ public class TeleOpMode extends OpMode
         right1Motor.setPower(right1MotorPower);
         left2Motor.setPower(left2MotorPower);
         right2Motor.setPower(right2MotorPower);
-
     }
-
 
     @Override
     public void stop() {
