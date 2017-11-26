@@ -52,9 +52,11 @@ public class Robot implements TrcPidController.PidInput, FtcMenu.MenuButtons, Tr
     private static final boolean USE_ANALOG_GYRO = false;
     private static final boolean USE_SPEECH = false;
     private static final boolean USE_VUFORIA = false;
+    private static final boolean USE_JEWEL_ARM = false;
     private static final boolean USE_JEWEL_COLOR_SENSOR = false;
     private static final boolean USE_CRYPTO_COLOR_SENSOR = false;
     private static final boolean USE_ANALOG_TRIGGERS = true;
+    private static final boolean USE_GLYPH_ELEVATOR = false;
 
     private static final String moduleName = "Robot";
 
@@ -81,6 +83,8 @@ public class Robot implements TrcPidController.PidInput, FtcMenu.MenuButtons, Tr
     TrcGyro gyro = null;
     double targetHeading = 0.0;
 
+    //Use the settings in RobotInfo to determine the trigger ranges for two types
+    //of red and one type of blue.
     static final double[] colorTriggerPoints = {
             RobotInfo.RED1_LOW_THRESHOLD, RobotInfo.RED1_HIGH_THRESHOLD,
             RobotInfo.BLUE_LOW_THRESHOLD, RobotInfo.BLUE_HIGH_THRESHOLD,
@@ -120,7 +124,7 @@ public class Robot implements TrcPidController.PidInput, FtcMenu.MenuButtons, Tr
     //
     // Other subsystems.
     //
-
+    JewelArm jewelArm = null;
 
     public Robot(TrcRobot.RunMode runMode)
     {
@@ -162,14 +166,17 @@ public class Robot implements TrcPidController.PidInput, FtcMenu.MenuButtons, Tr
             }
         }
 
-        if (USE_JEWEL_COLOR_SENSOR)
-        {
-            jewelColorSensor = new FtcColorSensor("jewelColorRangeSensor");
-            if (USE_ANALOG_TRIGGERS)
-            {
-                jewelColorTrigger = new TrcAnalogTrigger(
-                        "jewelColorTrigger", jewelColorSensor, 0, FtcColorSensor.DataType.HUE,
-                        colorTriggerPoints, this);
+        if (USE_JEWEL_ARM) {
+            jewelArm = new JewelArm("jewelArm");
+            if (USE_JEWEL_COLOR_SENSOR) {
+                jewelColorSensor = new FtcColorSensor("jewel_color_sensor");
+                if (USE_ANALOG_TRIGGERS) {
+                    //Register a trigger to notify this class when the jewel color sensor
+                    //detects a value which falls within the trigger points
+                    jewelColorTrigger = new TrcAnalogTrigger(
+                            "jewelColorTrigger", jewelColorSensor, 0, FtcColorSensor.DataType.HUE,
+                            colorTriggerPoints, this);
+                }
             }
         }
 
@@ -258,6 +265,7 @@ public class Robot implements TrcPidController.PidInput, FtcMenu.MenuButtons, Tr
         //
         // Initialize other subsystems.
         //
+
         //TODO
 
         //
@@ -318,6 +326,7 @@ public class Robot implements TrcPidController.PidInput, FtcMenu.MenuButtons, Tr
                 battery.getVoltage(), battery.getLowestVoltage());
     }   //traceStateInfo
 
+    //Returns an object containing information about the color detected by the specified color sensor
     ObjectColor getObjectColor(FtcColorSensor sensor)
     {
         ObjectColor color = ObjectColor.NO;
@@ -345,6 +354,7 @@ public class Robot implements TrcPidController.PidInput, FtcMenu.MenuButtons, Tr
         return color;
     }   //getObjectColor
 
+    //Returns the HSV hue detected by the specified color sensor
     double getObjectHsvHue(FtcColorSensor sensor)
     {
         double value = 0.0;
@@ -357,6 +367,7 @@ public class Robot implements TrcPidController.PidInput, FtcMenu.MenuButtons, Tr
         return value;
     }   //getObjectHsvHue
 
+    //Returns the HSV saturation detected by the specified color sensor
     double getObjectHsvSaturation(FtcColorSensor sensor)
     {
         double value = 0.0;
@@ -369,6 +380,7 @@ public class Robot implements TrcPidController.PidInput, FtcMenu.MenuButtons, Tr
         return value;
     }   //getObjectHsvSaturation
 
+    //Returns the HSV value detected by the specified color sensor
     double getObjectHsvValue(FtcColorSensor sensor)
     {
         double value = 0.0;
@@ -385,6 +397,15 @@ public class Robot implements TrcPidController.PidInput, FtcMenu.MenuButtons, Tr
     // Implements TrcPidController.PidInput
     //
 
+    /**
+     * Return a value to be used as the input value for a PID calculation.
+     * This value could be any one of the following, depending on the PID controller
+     * passed into the method:
+     *  1. X-axis motor encoder value
+     *  2. Y-axis motor encoder value
+     *  3. Gyro heading
+     *  4. VuMark from VuforiaVision subsystem
+     * */
     @Override
     public double getInput(TrcPidController pidCtrl)
     {
@@ -436,12 +457,14 @@ public class Robot implements TrcPidController.PidInput, FtcMenu.MenuButtons, Tr
 
     //
     // Implements TrcAnalogTrigger.TriggerHandler interface.
+    // This is a callback function which is called when a color sensor detects a value
+    // within a certain range.
     //
 
     @Override
     public void triggerEvent(TrcAnalogTrigger<?> analogTrigger, int zoneIndex, double zoneValue)
     {
-        FtcColorSensor colorSensor = analogTrigger == jewelColorTrigger? jewelColorSensor: cryptoColorSensor;
+        FtcColorSensor colorSensor = (analogTrigger == jewelColorTrigger ? jewelColorSensor : cryptoColorSensor);
         ObjectColor color = getObjectColor(colorSensor);
 
         if (analogTrigger == cryptoColorTrigger)
@@ -469,6 +492,8 @@ public class Robot implements TrcPidController.PidInput, FtcMenu.MenuButtons, Tr
         {
             textToSpeech.speak(
                     String.format("%s jewel found.", color.toString()), TextToSpeech.QUEUE_FLUSH, null);
+
+            //TODO: Move bot with arm extended to displace the jewel, with
         }
     }   // triggerEvent
 

@@ -53,6 +53,11 @@ public class FtcAuto extends FtcOpMode
         BLUE_ALLIANCE
     }   //enum Alliance
 
+    /*
+    * Location of platform relative to the relic zone
+    * This determines the robot's path to the crypto box/safe zone
+    *
+    * */
     enum StartPos
     {
         NEAR,

@@ -55,13 +55,16 @@ class CmdAutoFull implements TrcRobot.RobotCommand
 
     private enum State
     {
+        OPENING_MOVEMENT,
         DEPLOY_JEWEL_ARM,
-        WHACK_JEWEL,
-        MOVE_JEWEL_ARM_UP,
+        DECODE_PICTOGRAPH,
+        DISPLACE_JEWEL,
+        RETRACT_JEWEL_ARM,
         RESET_JEWEL_ARM,
         DO_DELAY,
         GRAB_LIFT_GLYPH,
         DRIVE_OFF_PLATFORM,
+        DRIVE_TO_SAFE_ZONE,
         TURN_TO_CRYPTOBOX,
         ALIGN_CRYPTOBOX,
         MOVE_FORWARD,
@@ -101,8 +104,10 @@ class CmdAutoFull implements TrcRobot.RobotCommand
         this.doJewel = doJewel;
         this.doCrypto = doCrypto;
 
+        //These are used by event system to make the state machine wait for specific events to be triggered
         event = new TrcEvent(moduleName);
         timer = new TrcTimer(moduleName);
+
         sm = new TrcStateMachine<>(moduleName);
 
         //Set start state here
@@ -130,72 +135,92 @@ class CmdAutoFull implements TrcRobot.RobotCommand
 
             switch (state)
             {
-//                case DEPLOY_JEWEL_ARM:
-//                    if (robot.jewelColorTrigger != null)
-//                    {
-//                        robot.jewelColorTrigger.setEnabled(true);
-//                    }
-//
-//                    retryCount = 0;
-//                    robot.jewelArm.setExtended(true);
-//                    timer.set(0.5, event);
-//                    sm.waitForSingleEvent(event, State.WHACK_JEWEL);
-//                    break;
-//
-//                case WHACK_JEWEL:
-//                    if (robot.jewelColorTrigger != null)
-//                    {
-//                        robot.jewelColorTrigger.setEnabled(false);
-//                    }
-//
-//                    vuMark = robot.vuforiaVision.getVuMark();
-//                    robot.tracer.traceInfo(state.toString(), "VuMark: %s", vuMark.toString());
-//                    if (robot.textToSpeech != null)
-//                    {
-//                        robot.textToSpeech.speak(
-//                                String.format("%s found!", vuMark), TextToSpeech.QUEUE_ADD, null);
-//                    }
-//
-//                    // determine the jewel color and whack the correct one.
-//                    Robot.ObjectColor jewelColor = robot.getObjectColor(robot.jewelColorSensor);
-//
-//                    robot.tracer.traceInfo(
-//                            state.toString(), "%d: Color=%s, HSV=[%.0f/%.0f/%.0f]",
-//                            retryCount, jewelColor.toString(),
-//                            robot.getObjectHsvHue(robot.jewelColorSensor),
-//                            robot.getObjectHsvSaturation(robot.jewelColorSensor),
-//                            robot.getObjectHsvValue(robot.jewelColorSensor));
-//                    if (jewelColor == Robot.ObjectColor.NO && retryCount < 10)
-//                    {
-//                        retryCount++;
-//                        break;
-//                    }
-//
-//                    double sweepPosition =
-//                            jewelColor == Robot.ObjectColor.RED && alliance == FtcAuto.Alliance.RED_ALLIANCE ||
-//                                    jewelColor == Robot.ObjectColor.BLUE && alliance == FtcAuto.Alliance.BLUE_ALLIANCE ?
-//                                    RobotInfo.JEWEL_ARM_FORWARD :
-//                                    jewelColor == Robot.ObjectColor.BLUE && alliance == FtcAuto.Alliance.RED_ALLIANCE ||
-//                                            jewelColor == Robot.ObjectColor.RED && alliance == FtcAuto.Alliance.BLUE_ALLIANCE ?
-//                                            RobotInfo.JEWEL_ARM_BACKWARD :
-//                                            RobotInfo.JEWEL_ARM_NEUTRAL;
-//                    robot.jewelArm.setSweepPosition(sweepPosition);
-//                    timer.set(0.5, event);
-//                    sm.waitForSingleEvent(event, State.MOVE_JEWEL_ARM_UP);
-//                    break;
-//
-//                case MOVE_JEWEL_ARM_UP:
-//                    robot.jewelArm.setExtended(false);
-//                    timer.set(0.3, event);
-//                    sm.waitForSingleEvent(event, State.RESET_JEWEL_ARM);
-//                    break;
-//
+                case DEPLOY_JEWEL_ARM:
+                    //Enable the jewel color sensor trigger
+                    if (robot.jewelColorTrigger != null)
+                    {
+                        robot.jewelColorTrigger.setEnabled(true);
+                    }
+
+                    retryCount = 0;
+                    robot.jewelArm.setExtended(true);
+                    //Set event to be signaled after specified amount of time
+                    timer.set(0.5, event);
+                    //State machine will wait for event to be signaled, then move to next state
+                    sm.waitForSingleEvent(event, State.DECODE_PICTOGRAPH);
+                    break;
+                case DISPLACE_JEWEL:
+                    //Disable the jewel color sensor trigger, we're done with it
+                    if (robot.jewelColorTrigger != null)
+                    {
+                        robot.jewelColorTrigger.setEnabled(false);
+                    }
+
+                    // determine the jewel color
+                    Robot.ObjectColor jewelColor = robot.getObjectColor(robot.jewelColorSensor);
+
+                    robot.tracer.traceInfo(
+                            state.toString(), "%d: Color=%s, HSV=[%.0f/%.0f/%.0f]",
+                            retryCount, jewelColor.toString(),
+                            robot.getObjectHsvHue(robot.jewelColorSensor),
+                            robot.getObjectHsvSaturation(robot.jewelColorSensor),
+                            robot.getObjectHsvValue(robot.jewelColorSensor));
+
+                    //Stay in this state for up to 10 iterations to detect jewel color
+                    if (jewelColor == Robot.ObjectColor.NO && retryCount < 10)
+                    {
+                        retryCount++;
+                        break;
+                    }
+
+                    //Absolute drive distance required to displace a jewel
+                    final double displacement_distance = 6;
+
+                    //Drive at half-power
+                    robot.encoderYPidCtrl.setOutputRange(-0.5, 0.5);
+                    //No movement along x-axis
+                    targetX = 0.0;
+                    //No gyro heading
+                    robot.targetHeading = 0.0;
+
+                    //Determine which direction to move to displace the correct jewel by specifying
+                    //a Y-axis drive target value of  + or - the desired distance
+                    if (jewelColor == Robot.ObjectColor.RED && alliance == FtcAuto.Alliance.RED_ALLIANCE ||
+                        jewelColor == Robot.ObjectColor.BLUE && alliance == FtcAuto.Alliance.BLUE_ALLIANCE) {
+                        targetY = -displacement_distance;
+                    } else if (jewelColor == Robot.ObjectColor.BLUE && alliance == FtcAuto.Alliance.RED_ALLIANCE ||
+                               jewelColor == Robot.ObjectColor.RED && alliance == FtcAuto.Alliance.BLUE_ALLIANCE) {
+                        targetY = displacement_distance;
+                    }
+
+                    robot.pidDrive.setTarget(targetX, targetY, robot.targetHeading, false, event, 2.0);
+                    sm.waitForSingleEvent(event, State.RETRACT_JEWEL_ARM);
+                    break;
+                case DECODE_PICTOGRAPH:
+                    vuMark = robot.vuforiaVision.getVuMark();
+                    robot.tracer.traceInfo(state.toString(), "VuMark: %s", vuMark.toString());
+                    if (robot.textToSpeech != null)
+                    {
+                        robot.textToSpeech.speak(
+                                String.format("%s found!", vuMark), TextToSpeech.QUEUE_ADD, null);
+                    }
+
+                    //No wait necessary for decoding, it's synchronous, so just set the next state
+                    sm.setState(State.DISPLACE_JEWEL);
+                    break;
+                case RETRACT_JEWEL_ARM:
+                    robot.jewelArm.setExtended(false);
+                    timer.set(0.3, event);
+                    sm.waitForSingleEvent(event, State.DRIVE_TO_SAFE_ZONE);
+                    break;
 //                case RESET_JEWEL_ARM:
 //                    robot.jewelArm.setSweepPosition(RobotInfo.JEWEL_ARM_NEUTRAL);
 //                    timer.set(0.3, event);
 //                    sm.waitForSingleEvent(event, State.DO_DELAY);
 //                    break;
-
+                case DRIVE_TO_SAFE_ZONE:
+                    //Path depends on start position
+                    break;
                 case DO_DELAY:
                     //
                     // Do delay if any.
@@ -354,13 +379,13 @@ class CmdAutoFull implements TrcRobot.RobotCommand
 //                    sm.waitForSingleEvent(event, State.BACK_OFF);
 //                    break;
 
-                case BACK_OFF:
-                    targetX = 0.0;
-                    targetY = -4.5;
-
-                    robot.pidDrive.setTarget(targetX, targetY, robot.targetHeading, false, event, 1.0);
-                    sm.waitForSingleEvent(event, State.DONE);
-                    break;
+//                case BACK_OFF:
+//                    targetX = 0.0;
+//                    targetY = -4.5;
+//
+//                    robot.pidDrive.setTarget(targetX, targetY, robot.targetHeading, false, event, 1.0);
+//                    sm.waitForSingleEvent(event, State.DONE);
+//                    break;
 
                 case DONE:
                 default:
