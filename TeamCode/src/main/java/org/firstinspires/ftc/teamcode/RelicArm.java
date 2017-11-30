@@ -115,7 +115,7 @@ public class RelicArm implements TrcPidController.PidInput//, TrcPidMotor2.Power
                         RobotInfo.RELIC_ELBOW_KP, RobotInfo.RELIC_ELBOW_KI, RobotInfo.RELIC_ELBOW_KD),
                 RobotInfo.RELIC_ELBOW_TOLERANCE, this);
 
-        elbow_pid = new TrcPidMotor2("elbow_pid",elbow1,elbow2,1.0,elbow_controller, null);
+        elbow_pid = new TrcPidMotor2("elbow_pid",elbow1,elbow2,0.0,elbow_controller, null);
 
         elbow = new TrcPidActuator2("elbow",elbow_pid,elbow_lower_limit_switch, RobotInfo.RELIC_ELBOW_MIN_POS, RobotInfo.RELIC_ELBOW_MAX_POS);
         elbow.setPositionScale(RobotInfo.RELIC_ELBOW_DEGREES_PER_COUNT, RobotInfo.RELIC_ELBOW_POS_OFFSET);
