@@ -111,7 +111,7 @@ class CmdAutoFull implements TrcRobot.RobotCommand
         sm = new TrcStateMachine<>(moduleName);
 
         //Set start state here
-        sm.start(State.DRIVE_OFF_PLATFORM);
+        sm.start(State.DEPLOY_JEWEL_ARM);
         //sm.start(doJewel == FtcAuto.DoJewel.YES? State.DEPLOY_JEWEL_ARM: State.DO_DELAY);
     }   //CmdAutoFull
 
@@ -147,7 +147,7 @@ class CmdAutoFull implements TrcRobot.RobotCommand
                     //Set event to be signaled after specified amount of time
                     timer.set(0.5, event);
                     //State machine will wait for event to be signaled, then move to next state
-                    sm.waitForSingleEvent(event, State.DECODE_PICTOGRAPH);
+                    sm.waitForSingleEvent(event, State.RETRACT_JEWEL_ARM);
                     break;
                 case DISPLACE_JEWEL:
                     //Disable the jewel color sensor trigger, we're done with it
@@ -211,7 +211,7 @@ class CmdAutoFull implements TrcRobot.RobotCommand
                 case RETRACT_JEWEL_ARM:
                     robot.jewelArm.setExtended(false);
                     timer.set(0.3, event);
-                    sm.waitForSingleEvent(event, State.DRIVE_TO_SAFE_ZONE);
+                    sm.waitForSingleEvent(event, State.DONE);
                     break;
 //                case RESET_JEWEL_ARM:
 //                    robot.jewelArm.setSweepPosition(RobotInfo.JEWEL_ARM_NEUTRAL);

@@ -52,7 +52,7 @@ public class JewelArm
     public JewelArm(String instanceName)
     {
         this.instanceName = instanceName;
-        verticalServo = new FtcServo(instanceName + "jewel_arm_servo");
+        verticalServo = new FtcServo(instanceName + "jewel_servo");
         //horizontalServo = new FtcServo(instanceName + "HorizontalServo");
     }   //JewelArm
 
