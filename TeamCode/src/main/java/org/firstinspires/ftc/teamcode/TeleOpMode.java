@@ -46,10 +46,24 @@ import com.qualcomm.robotcore.util.Range;
 @Disabled
 public class TeleOpMode extends OpMode
 {
+    //HUB 1
     // Port 0 = left_front_drive
     // Port 1 = right_front_drive
     // Port 2 = left_back_motor
     // Port 3 = right_back_motor
+
+    //HUB 2
+    //MOTORS
+    //Port 0 = left_arm
+    //Port 1 = right_arm
+    //Port 2 = linear_acc
+    //Port 3 = syringe_motor
+    //SERVOS
+    //Port 0 = jewel_servo
+    //Port 1 = claw_servo
+    //Port 2 = claw_flipper
+    //Port 3 = claw_rotator
+    //I2C BUS 0 = sensor_color_digital
     /* Declare OpMode members. */
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor left1Motor = null;
