@@ -32,10 +32,10 @@ class RobotInfo
     // Color sensor values.
     //
     static final double RED1_LOW_THRESHOLD              = 1.0;
-    static final double RED1_HIGH_THRESHOLD             = 40.0;
-    static final double BLUE_LOW_THRESHOLD              = 150.0;
-    static final double BLUE_HIGH_THRESHOLD             = 220.0;
-    static final double RED2_LOW_THRESHOLD              = 350.0;
+    static final double RED1_HIGH_THRESHOLD             = 30.0;
+    static final double BLUE_LOW_THRESHOLD              = 40.0;
+    static final double BLUE_HIGH_THRESHOLD             = 210.0;
+    static final double RED2_LOW_THRESHOLD              = 340.0;
     static final double RED2_HIGH_THRESHOLD             = 359.0;
 
     //
@@ -90,9 +90,8 @@ class RobotInfo
     // JewelBar subsystem.
     //
     //These values depend on whether servo is continuous or 180-deg.
-    //See comment on lines 54-59 in Ftc3543Lib\java\ftclib\TrcServo.java
-    static final double JEWEL_ARM_RETRACTED             = 0.1;
-    static final double JEWEL_ARM_EXTENDED              = 0.7;
+    static final double JEWEL_ARM_RETRACTED             = -0.5;
+    static final double JEWEL_ARM_EXTENDED              = 0.5;
 
     //
     // RelicArm subsystem.

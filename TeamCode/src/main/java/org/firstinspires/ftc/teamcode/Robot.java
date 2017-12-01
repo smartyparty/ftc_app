@@ -33,6 +33,7 @@ import ftclib.FtcAndroidTone;
 import ftclib.FtcBNO055Imu;
 import ftclib.FtcColorSensor;
 import ftclib.FtcDcMotor;
+import ftclib.FtcDistanceSensor;
 import ftclib.FtcMenu;
 import ftclib.FtcOpMode;
 import ftclib.FtcRobotBattery;
@@ -50,10 +51,10 @@ public class Robot implements TrcPidController.PidInput, FtcMenu.MenuButtons, Tr
 {
     private static final boolean USE_IMU = true;
     private static final boolean USE_ANALOG_GYRO = false;
-    private static final boolean USE_SPEECH = false;
+    private static final boolean USE_SPEECH = true;
     private static final boolean USE_VUFORIA = false;
-    private static final boolean USE_JEWEL_ARM = false;
-    private static final boolean USE_JEWEL_COLOR_SENSOR = false;
+    private static final boolean USE_JEWEL_ARM = true;
+    private static final boolean USE_JEWEL_COLOR_SENSOR = true;
     private static final boolean USE_CRYPTO_COLOR_SENSOR = false;
     private static final boolean USE_ANALOG_TRIGGERS = true;
     private static final boolean USE_GLYPH_ELEVATOR = false;
@@ -91,6 +92,7 @@ public class Robot implements TrcPidController.PidInput, FtcMenu.MenuButtons, Tr
             RobotInfo.RED2_LOW_THRESHOLD, RobotInfo.RED2_HIGH_THRESHOLD};
 
     FtcColorSensor jewelColorSensor = null;
+    FtcDistanceSensor jewelDistanceSensor = null;
     TrcAnalogTrigger<FtcColorSensor.DataType> jewelColorTrigger = null;
 
     FtcColorSensor cryptoColorSensor = null;
@@ -170,6 +172,7 @@ public class Robot implements TrcPidController.PidInput, FtcMenu.MenuButtons, Tr
             jewelArm = new JewelArm("jewelArm");
             if (USE_JEWEL_COLOR_SENSOR) {
                 jewelColorSensor = new FtcColorSensor("jewel_color_sensor");
+                jewelDistanceSensor = new FtcDistanceSensor("jewel_color_sensor");
                 if (USE_ANALOG_TRIGGERS) {
                     //Register a trigger to notify this class when the jewel color sensor
                     //detects a value which falls within the trigger points
@@ -487,6 +490,10 @@ public class Robot implements TrcPidController.PidInput, FtcMenu.MenuButtons, Tr
                             String.format("%s blue crypto.", blueCryptoBarCount), TextToSpeech.QUEUE_FLUSH, null);
                 }
             }
+        }
+        else if (analogTrigger == jewelColorTrigger) {
+            textToSpeech.speak(
+                    String.format("%s jewel detected.", this.getObjectColor(this.jewelColorSensor).toString()), TextToSpeech.QUEUE_FLUSH, null);
         }
         else if (textToSpeech != null)
         {

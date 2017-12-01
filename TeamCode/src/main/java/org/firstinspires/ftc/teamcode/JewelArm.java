@@ -45,6 +45,8 @@ public class JewelArm
     private FtcServo verticalServo;
     private FtcServo horizontalServo;
     private boolean armExtended = false;
+    private double extendedPos = RobotInfo.JEWEL_ARM_EXTENDED;
+    private double retractedPos = RobotInfo.JEWEL_ARM_RETRACTED;
 
     /**
      * Constructor: Create an instance of the object  .
@@ -52,7 +54,8 @@ public class JewelArm
     public JewelArm(String instanceName)
     {
         this.instanceName = instanceName;
-        verticalServo = new FtcServo(instanceName + "jewel_servo");
+        verticalServo = new FtcServo("jewel_servo");
+        verticalServo.setPosition(RobotInfo.JEWEL_ARM_RETRACTED);
         //horizontalServo = new FtcServo(instanceName + "HorizontalServo");
     }   //JewelArm
 
@@ -61,10 +64,26 @@ public class JewelArm
         return instanceName;
     }
 
+    public double getExtendedPos() {
+        return extendedPos;
+    }
+
+    public double getRetractedPos() {
+        return retractedPos;
+    }
+
+    public void setExtendedPos(double pos) {
+        extendedPos = pos;
+    }
+
+    public void setRetractedPos(double pos) {
+        retractedPos = pos;
+    }
+
     public void setExtended(boolean extended)
     {
         armExtended = extended;
-        verticalServo.setPosition(extended ? RobotInfo.JEWEL_ARM_EXTENDED: RobotInfo.JEWEL_ARM_RETRACTED);
+        verticalServo.setPosition(extended ? extendedPos: retractedPos);
     }
 
 //    public void setSweepPosition(double pos)
