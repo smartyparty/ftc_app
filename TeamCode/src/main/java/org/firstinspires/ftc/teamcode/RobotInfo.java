@@ -86,12 +86,16 @@ class RobotInfo
     static final double VISION_KD                       = 0.0;
     static final double VISION_TOLERANCE                = 1.0;
 
+    static final double AUTO_PARKING_POWER              = 1.0;
+
     //
     // JewelBar subsystem.
     //
     //These values depend on whether servo is continuous or 180-deg.
     static final double JEWEL_ARM_RETRACTED             = -0.5;
-    static final double JEWEL_ARM_EXTENDED              = 0.5;
+    static final double JEWEL_ARM_EXTENDED              = 0.6;
+    static final double JEWEL_DISPLACEMENT_DRIVE_TIME   = 0.3;
+    static final double JEWEL_DISPLACEMENT_DRIVE_POWER  = 0.3;
 
     //
     // RelicArm subsystem.

@@ -128,6 +128,8 @@ public class Robot implements TrcPidController.PidInput, FtcMenu.MenuButtons, Tr
     //
     JewelArm jewelArm = null;
 
+    RelicArm relicArm = null;
+
     public Robot(TrcRobot.RunMode runMode)
     {
         //
@@ -268,6 +270,7 @@ public class Robot implements TrcPidController.PidInput, FtcMenu.MenuButtons, Tr
         //
         // Initialize other subsystems.
         //
+        relicArm = new RelicArm();
 
         //TODO
 

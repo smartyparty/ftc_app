@@ -49,8 +49,8 @@ public class RelicArm implements TrcPidController.PidInput//, TrcPidMotor2.Power
 
     //Private motor variables used to create enhanced motor that support limit sensors/PID/min-max range/joystick control
     //TrcPidMotor2 allows control of two motors with one class
-    private FtcDcMotor elbow1;
-    private FtcDcMotor elbow2;
+    public FtcDcMotor elbow1;
+    public FtcDcMotor elbow2;
     //Provide PID control of 2 motors via one class
     private TrcPidMotor2 elbow_pid;
     //PID controller for both elbow motors
@@ -91,54 +91,56 @@ public class RelicArm implements TrcPidController.PidInput//, TrcPidMotor2.Power
         // - Rotator to select between claw/suction (continuous servo)
         // - Flipper to stow/deploy claw (180 servo)
         // - Syringe to provide suction to cup (AndyMark NeveRest motor)
+//
+//
+//        //Elbow
+//        elbow_lower_limit_switch = new FtcDigitalInput("extenderLowerLimit");
 
-        extender_motor = new FtcDcMotor("linear_acc");
-
-
-        //Elbow
-        elbow_lower_limit_switch = new FtcDigitalInput("extenderLowerLimit");
-
-        elbow1 = new FtcDcMotor("l_arm");
+        elbow1 = new FtcDcMotor("left_arm");
         elbow1.setInverted(false);
         //Stop motor abruptly, rather than coast/float
         elbow1.setBrakeModeEnabled(true);
 
-        elbow2 = new FtcDcMotor( "r_arm");
+        elbow2 = new FtcDcMotor( "right_arm");
         //Invert this motor if mounted opposite
-        elbow2.setInverted(true);
+        elbow2.setInverted(false);
         //Stop motor abruptly, rather than coast/float
         elbow2.setBrakeModeEnabled(true);
 
-        elbow_controller = new TrcPidController(
-                "elbowPidCtrl",
-                new TrcPidController.PidCoefficients(
-                        RobotInfo.RELIC_ELBOW_KP, RobotInfo.RELIC_ELBOW_KI, RobotInfo.RELIC_ELBOW_KD),
-                RobotInfo.RELIC_ELBOW_TOLERANCE, this);
+//        elbow_controller = new TrcPidController(
+//                "elbowPidCtrl",
+//                new TrcPidController.PidCoefficients(
+//                        RobotInfo.RELIC_ELBOW_KP, RobotInfo.RELIC_ELBOW_KI, RobotInfo.RELIC_ELBOW_KD),
+//                RobotInfo.RELIC_ELBOW_TOLERANCE, this);
+//
+//        elbow_pid = new TrcPidMotor2("elbow_pid",elbow1,elbow2,0.0,elbow_controller, null);
+//
+//        elbow = new TrcPidActuator2("elbow",elbow_pid,elbow_lower_limit_switch, RobotInfo.RELIC_ELBOW_MIN_POS, RobotInfo.RELIC_ELBOW_MAX_POS);
+//        elbow.setPositionScale(RobotInfo.RELIC_ELBOW_DEGREES_PER_COUNT, RobotInfo.RELIC_ELBOW_POS_OFFSET);
+//        elbow.setManualOverride(true);
 
-        elbow_pid = new TrcPidMotor2("elbow_pid",elbow1,elbow2,0.0,elbow_controller, null);
+//        extender_motor = new FtcDcMotor("linear_acc");
+//        extender_controller = new TrcPidController("extender_motor", new TrcPidController.PidCoefficients(
+//                RobotInfo.RELIC_EXTENDER_KP, RobotInfo.RELIC_EXTENDER_KI, RobotInfo.RELIC_EXTENDER_KD),
+//                RobotInfo.RELIC_EXTENDER_TOLERANCE, this);
+//        extender = new TrcPidActuator("extender",extender_motor,null,extender_controller,RobotInfo.RELIC_EXTENDER_MIN_POS, RobotInfo.RELIC_EXTENDER_MAX_POS);
 
-        elbow = new TrcPidActuator2("elbow",elbow_pid,elbow_lower_limit_switch, RobotInfo.RELIC_ELBOW_MIN_POS, RobotInfo.RELIC_ELBOW_MAX_POS);
-        elbow.setPositionScale(RobotInfo.RELIC_ELBOW_DEGREES_PER_COUNT, RobotInfo.RELIC_ELBOW_POS_OFFSET);
-        elbow.setManualOverride(true);
+//        claw = new FtcServo("claw_servo");
+//        claw.setInverted(true);
 
-        claw = new FtcServo("claw_servo");
-        claw.setInverted(true);
-
-        syringe_motor = new FtcDcMotor("syringe_motor");
-        syringe_controller = new TrcPidController("syringe_motor", new TrcPidController.PidCoefficients(
-                RobotInfo.RELIC_SYRINGE_KP, RobotInfo.RELIC_SYRINGE_KI, RobotInfo.RELIC_SYRINGE_KD),
-                RobotInfo.RELIC_SYRINGE_TOLERANCE, this);
-        syringe = new TrcPidActuator("syringe",syringe_motor,null,syringe_controller,RobotInfo.RELIC_SYRINGE_MIN_POS, RobotInfo.RELIC_SYRINGE_MAX_POS);
-
-
-        //TODO: uncomment if syringe stopper servo installed
-        //syringe_stopper_servo = new FtcServo("relicArmStopper");
-
-        claw_rotator = new FtcServo("claw_rotator");
-        claw_rotator.setLogicalRange(RobotInfo.RELIC_CLAW_CLOSE, RobotInfo.RELIC_CLAW_OPEN);
-
-        claw_flipper = new FtcServo("claw_flipper");
-        claw_flipper.setLogicalRange(RobotInfo.RELIC_FLIPPER_STOW, RobotInfo.RELIC_FLIPPER_DEPLOY);
+//        syringe_motor = new FtcDcMotor("syringe_motor");
+//        syringe_controller = new TrcPidController("syringe_motor", new TrcPidController.PidCoefficients(
+//                RobotInfo.RELIC_SYRINGE_KP, RobotInfo.RELIC_SYRINGE_KI, RobotInfo.RELIC_SYRINGE_KD),
+//                RobotInfo.RELIC_SYRINGE_TOLERANCE, this);
+//        syringe = new TrcPidActuator("syringe",syringe_motor,null,syringe_controller,RobotInfo.RELIC_SYRINGE_MIN_POS, RobotInfo.RELIC_SYRINGE_MAX_POS);
+//
+//
+//        //TODO: uncomment if syringe stopper servo installed
+//        //syringe_stopper_servo = new FtcServo("relicArmStopper");
+//
+//        claw_rotator = new FtcServo("claw_rotator");
+//
+//        claw_flipper = new FtcServo("claw_flipper");
 
     }   //RelicArm
 
@@ -156,7 +158,7 @@ public class RelicArm implements TrcPidController.PidInput//, TrcPidMotor2.Power
     @Override
     public double getInput(TrcPidController pidCtrl)
     {
-        return elbow.getPosition();
+        return 0;   //elbow.getPosition();
     }   //getInput
 
     //

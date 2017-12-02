@@ -43,7 +43,6 @@ public class JewelArm
 
     private String instanceName;
     private FtcServo verticalServo;
-    private FtcServo horizontalServo;
     private boolean armExtended = false;
     private double extendedPos = RobotInfo.JEWEL_ARM_EXTENDED;
     private double retractedPos = RobotInfo.JEWEL_ARM_RETRACTED;
@@ -55,8 +54,13 @@ public class JewelArm
     {
         this.instanceName = instanceName;
         verticalServo = new FtcServo("jewel_servo");
-        verticalServo.setPosition(RobotInfo.JEWEL_ARM_RETRACTED);
-        //horizontalServo = new FtcServo(instanceName + "HorizontalServo");
+
+        //Define the physical range of the HS485HB servo
+        //Logical range will be 0 to 1 and scaled accordingly
+        verticalServo.setInverted(false);
+        verticalServo.setPosition(retractedPos);
+        //verticalServo.setPhysicalRange(0,180);
+        //verticalServo.setLogicalRange(0.1,0.9);
     }   //JewelArm
 
     public String toString()
@@ -78,6 +82,10 @@ public class JewelArm
 
     public void setRetractedPos(double pos) {
         retractedPos = pos;
+    }
+
+    public double getPosition() {
+        return verticalServo.getPosition();
     }
 
     public void setExtended(boolean extended)

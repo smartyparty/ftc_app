@@ -55,8 +55,8 @@ class CmdAutoFull implements TrcRobot.RobotCommand
 
     private enum State
     {
-        OPENING_MOVEMENT,
         DEPLOY_JEWEL_ARM,
+        DETECT_JEWEL_COLOR,
         DECODE_PICTOGRAPH,
         DISPLACE_JEWEL,
         RETRACT_JEWEL_ARM,
@@ -127,7 +127,9 @@ class CmdAutoFull implements TrcRobot.RobotCommand
         // Print debug info.
         //
         State state = sm.getState();
-        robot.dashboard.displayPrintf(1, "State: %s", state != null? sm.getState().toString(): "Disabled");
+        robot.dashboard.displayPrintf(1, "State: %s", state != null ? sm.getState().toString(): "Disabled");
+
+        //Display other state info here
 
         if (sm.isReady())
         {
@@ -149,7 +151,7 @@ class CmdAutoFull implements TrcRobot.RobotCommand
                     //State machine will wait for event to be signaled, then move to next state
                     sm.waitForSingleEvent(event, State.RETRACT_JEWEL_ARM);
                     break;
-                case DISPLACE_JEWEL:
+                case DETECT_JEWEL_COLOR:
                     //Disable the jewel color sensor trigger, we're done with it
                     if (robot.jewelColorTrigger != null)
                     {
@@ -169,73 +171,79 @@ class CmdAutoFull implements TrcRobot.RobotCommand
                     //Stay in this state for up to 10 iterations to detect jewel color
                     if (jewelColor == Robot.ObjectColor.NO && retryCount < 10)
                     {
+                        //Incrememnt retry count and exit switch statement. Robot
+                        //will remain in current state
                         retryCount++;
                         break;
                     }
 
-                    //Absolute drive distance required to displace a jewel
-                    final double displacement_distance = 6;
-
-                    //Drive at half-power
-                    robot.encoderYPidCtrl.setOutputRange(-0.5, 0.5);
-                    //No movement along x-axis
-                    targetX = 0.0;
-                    //No gyro heading
-                    robot.targetHeading = 0.0;
-
-                    //Determine which direction to move to displace the correct jewel by specifying
-                    //a Y-axis drive target value of  + or - the desired distance
-                    if (jewelColor == Robot.ObjectColor.RED && alliance == FtcAuto.Alliance.RED_ALLIANCE ||
-                        jewelColor == Robot.ObjectColor.BLUE && alliance == FtcAuto.Alliance.BLUE_ALLIANCE) {
-                        targetY = -displacement_distance;
-                    } else if (jewelColor == Robot.ObjectColor.BLUE && alliance == FtcAuto.Alliance.RED_ALLIANCE ||
-                               jewelColor == Robot.ObjectColor.RED && alliance == FtcAuto.Alliance.BLUE_ALLIANCE) {
-                        targetY = displacement_distance;
+                    //If we get here, we either have a color, or we have exceeded our retry count
+                    if (jewelColor != Robot.ObjectColor.NO) {
+                        //Displace the jewel if we detected a color
+                        sm.waitForSingleEvent(event, State.DISPLACE_JEWEL);
+                    } else {
+                        //retract jewel arm
+                        robot.jewelArm.setExtended(false);
+                        //proceed to safe zone
+                        sm.waitForSingleEvent(event, State.DRIVE_TO_SAFE_ZONE);
                     }
-
-                    robot.pidDrive.setTarget(targetX, targetY, robot.targetHeading, false, event, 2.0);
-                    sm.waitForSingleEvent(event, State.RETRACT_JEWEL_ARM);
                     break;
-                case DECODE_PICTOGRAPH:
-                    vuMark = robot.vuforiaVision.getVuMark();
-                    robot.tracer.traceInfo(state.toString(), "VuMark: %s", vuMark.toString());
-                    if (robot.textToSpeech != null)
-                    {
-                        robot.textToSpeech.speak(
-                                String.format("%s found!", vuMark), TextToSpeech.QUEUE_ADD, null);
-                    }
-
-                    //No wait necessary for decoding, it's synchronous, so just set the next state
-                    sm.setState(State.DISPLACE_JEWEL);
-                    break;
-                case RETRACT_JEWEL_ARM:
+                case DISPLACE_JEWEL:
+                    //retract jewel arm
                     robot.jewelArm.setExtended(false);
-                    timer.set(0.3, event);
-                    sm.waitForSingleEvent(event, State.DONE);
+
+                    //TODO: Displace jewel using timed drive in proper direction
+
+                    //Set event to be signaled after specified amount of time
+                    timer.set(0.5, event);
+                    //Park in safe zone
+                    sm.waitForSingleEvent(event, State.DRIVE_TO_SAFE_ZONE);
                     break;
+//                case DECODE_PICTOGRAPH:
+//                    vuMark = robot.vuforiaVision.getVuMark();
+//                    robot.tracer.traceInfo(state.toString(), "VuMark: %s", vuMark.toString());
+//                    if (robot.textToSpeech != null)
+//                    {
+//                        robot.textToSpeech.speak(
+//                                String.format("%s found!", vuMark), TextToSpeech.QUEUE_ADD, null);
+//                    }
+//
+//                    //No wait necessary for decoding, it's synchronous, so just set the next state
+//                    sm.setState(State.DISPLACE_JEWEL);
+//                    break;
+//                case RETRACT_JEWEL_ARM:
+//                    robot.jewelArm.setExtended(false);
+//                    timer.set(0.3, event);
+//                    sm.waitForSingleEvent(event, State.DONE);
+//                    break;
 //                case RESET_JEWEL_ARM:
 //                    robot.jewelArm.setSweepPosition(RobotInfo.JEWEL_ARM_NEUTRAL);
 //                    timer.set(0.3, event);
 //                    sm.waitForSingleEvent(event, State.DO_DELAY);
 //                    break;
                 case DRIVE_TO_SAFE_ZONE:
-                    //Path depends on start position
+                    //Path depends on start position and alliance
+
+                    //Set event to be signaled after specified amount of time
+                    timer.set(0.5, event);
+                    //Park in safe zone
+                    sm.waitForSingleEvent(event, State.DONE);
                     break;
-                case DO_DELAY:
-                    //
-                    // Do delay if any.
-                    //
-                    robot.tracer.traceInfo(state.toString(), "Delay=%.0f", delay);
-                    if (delay == 0.0)
-                    {
-                        sm.setState(State.GRAB_LIFT_GLYPH);
-                    }
-                    else
-                    {
-                        timer.set(delay, event);
-                        sm.waitForSingleEvent(event, State.GRAB_LIFT_GLYPH);
-                    }
-                    break;
+//                case DO_DELAY:
+//                    //
+//                    // Do delay if any.
+//                    //
+//                    robot.tracer.traceInfo(state.toString(), "Delay=%.0f", delay);
+//                    if (delay == 0.0)
+//                    {
+//                        sm.setState(State.GRAB_LIFT_GLYPH);
+//                    }
+//                    else
+//                    {
+//                        timer.set(delay, event);
+//                        sm.waitForSingleEvent(event, State.GRAB_LIFT_GLYPH);
+//                    }
+//                    break;
 
 //                case GRAB_LIFT_GLYPH:
 //                    robot.glyphGrabber.setPosition(RobotInfo.GLYPH_GRABBER_CLOSE);
@@ -243,28 +251,28 @@ class CmdAutoFull implements TrcRobot.RobotCommand
 //                    sm.waitForSingleEvent(event, State.DRIVE_OFF_PLATFORM);
 //                    break;
 
-                case DRIVE_OFF_PLATFORM:
-                    robot.encoderYPidCtrl.setOutputRange(-0.5, 0.5);
-                    targetX = 0.0;
-                    targetY = alliance == FtcAuto.Alliance.RED_ALLIANCE ? -22.0 : 26.0;
-                    robot.targetHeading = 0.0;
-
-                    robot.pidDrive.setTarget(targetX, targetY, robot.targetHeading, false, event, 2.0);
-                    sm.waitForSingleEvent(event, State.TURN_TO_CRYPTOBOX);
-                    break;
-
-                case TURN_TO_CRYPTOBOX:
-                    robot.encoderYPidCtrl.setOutputRange(-1.0, 1.0);
-                    targetX = 0.0;
-                    targetY = 0.0;
-                    robot.targetHeading =
-                            startPos == FtcAuto.StartPos.FAR ? -90.0 :
-                                    alliance == FtcAuto.Alliance.RED_ALLIANCE && startPos == FtcAuto.StartPos.NEAR ? 180.0 : 0.0;
-
-                    robot.pidDrive.setTarget(targetX, targetY, robot.targetHeading, false, event, 3.0);
-                    //sm.waitForSingleEvent(event, State.ALIGN_CRYPTOBOX);
-                    sm.waitForSingleEvent(event, State.DONE);
-                    break;
+//                case DRIVE_OFF_PLATFORM:
+//                    robot.encoderYPidCtrl.setOutputRange(-0.5, 0.5);
+//                    targetX = 0.0;
+//                    targetY = alliance == FtcAuto.Alliance.RED_ALLIANCE ? -22.0 : 26.0;
+//                    robot.targetHeading = 0.0;
+//
+//                    robot.pidDrive.setTarget(targetX, targetY, robot.targetHeading, false, event, 2.0);
+//                    sm.waitForSingleEvent(event, State.TURN_TO_CRYPTOBOX);
+//                    break;
+//
+//                case TURN_TO_CRYPTOBOX:
+//                    robot.encoderYPidCtrl.setOutputRange(-1.0, 1.0);
+//                    targetX = 0.0;
+//                    targetY = 0.0;
+//                    robot.targetHeading =
+//                            startPos == FtcAuto.StartPos.FAR ? -90.0 :
+//                                    alliance == FtcAuto.Alliance.RED_ALLIANCE && startPos == FtcAuto.StartPos.NEAR ? 180.0 : 0.0;
+//
+//                    robot.pidDrive.setTarget(targetX, targetY, robot.targetHeading, false, event, 3.0);
+//                    //sm.waitForSingleEvent(event, State.ALIGN_CRYPTOBOX);
+//                    sm.waitForSingleEvent(event, State.DONE);
+//                    break;
 
 //                case ALIGN_CRYPTOBOX:
 //                    if (robot.cryptoColorTrigger != null)
@@ -346,26 +354,26 @@ class CmdAutoFull implements TrcRobot.RobotCommand
 //                    sm.waitForSingleEvent(event, State.MOVE_FORWARD);
 //                    break;
 
-                case MOVE_FORWARD:
-                    if (robot.cryptoColorTrigger != null)
-                    {
-                        robot.cryptoColorTrigger.setEnabled(false);
-                    }
-
-                    // Move forward
-                    targetX = 0.0;
-                    if (alliance == FtcAuto.Alliance.RED_ALLIANCE)
-                    {
-                        targetY = 15.0;
-                    }
-                    else
-                    {
-                        targetY = 8.0;
-                    }
-
-                    robot.pidDrive.setTarget(targetX, targetY, robot.targetHeading, false, event, 1.0);
-                    sm.waitForSingleEvent(event, doCrypto == FtcAuto.DoCrypto.NO? State.DONE: State.SET_DOWN_GLYPH);
-                    break;
+//                case MOVE_FORWARD:
+//                    if (robot.cryptoColorTrigger != null)
+//                    {
+//                        robot.cryptoColorTrigger.setEnabled(false);
+//                    }
+//
+//                    // Move forward
+//                    targetX = 0.0;
+//                    if (alliance == FtcAuto.Alliance.RED_ALLIANCE)
+//                    {
+//                        targetY = 15.0;
+//                    }
+//                    else
+//                    {
+//                        targetY = 8.0;
+//                    }
+//
+//                    robot.pidDrive.setTarget(targetX, targetY, robot.targetHeading, false, event, 1.0);
+//                    sm.waitForSingleEvent(event, doCrypto == FtcAuto.DoCrypto.NO? State.DONE: State.SET_DOWN_GLYPH);
+//                    break;
 
 //                case SET_DOWN_GLYPH:
 //                    // lower the elevator
