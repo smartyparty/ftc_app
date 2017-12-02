@@ -86,7 +86,7 @@ class RobotInfo
     static final double VISION_KD                       = 0.0;
     static final double VISION_TOLERANCE                = 1.0;
 
-    static final double AUTO_PARKING_POWER              = 1.0;
+    static final double AUTO_PARKING_POWER              = 0.8;
 
     //
     // JewelBar subsystem.

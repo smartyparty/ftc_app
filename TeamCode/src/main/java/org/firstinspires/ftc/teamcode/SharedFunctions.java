@@ -13,6 +13,18 @@ enum StartPos
     FAR
 }
 
+enum DoJewel
+{
+    YES,
+    NO
+}
+
+enum DoCrypto
+{
+    YES,
+    NO
+}
+
 /**
  * Created by pmartin on 12/1/2017.
  */

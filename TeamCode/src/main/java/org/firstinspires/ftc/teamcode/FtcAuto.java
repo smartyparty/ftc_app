@@ -34,7 +34,7 @@ import ftclib.FtcValueMenu;
 import trclib.TrcRobot;
 
 @Autonomous(name="Autonomous", group="TRCLib")
-@Disabled
+//@Disabled
 public class FtcAuto extends FtcOpMode
 {
     private static final boolean USE_TRACELOG = false;
@@ -47,34 +47,34 @@ public class FtcAuto extends FtcOpMode
         FINAL
     }   //enum MatchType
 
-    enum Alliance
-    {
-        RED_ALLIANCE,
-        BLUE_ALLIANCE
-    }   //enum Alliance
+//    enum Alliance
+//    {
+//        RED_ALLIANCE,
+//        BLUE_ALLIANCE
+//    }   //enum Alliance
 
     /*
     * Location of platform relative to the relic zone
     * This determines the robot's path to the crypto box/safe zone
     *
     * */
-    enum StartPos
-    {
-        NEAR,
-        FAR
-    }
+//    enum StartPos
+//    {
+//        NEAR,
+//        FAR
+//    }
 
-    enum DoJewel
-    {
-        YES,
-        NO
-    }
-
-    enum DoCrypto
-    {
-        YES,
-        NO
-    }
+//    enum DoJewel
+//    {
+//        YES,
+//        NO
+//    }
+//
+//    enum DoCrypto
+//    {
+//        YES,
+//        NO
+//    }
 
     private enum Strategy
     {
@@ -90,12 +90,12 @@ public class FtcAuto extends FtcOpMode
     private TrcRobot.RobotCommand autoCommand = null;
     private MatchType matchType = MatchType.PRACTICE;
     private int matchNumber = 0;
-    private Alliance alliance = Alliance.RED_ALLIANCE;
+    private Alliance alliance = Alliance.RED;
     private double delay = 0.0;
     private StartPos startPos = StartPos.NEAR;
-    private Strategy strategy = Strategy.DO_NOTHING;
-    private DoJewel jewelChoice = DoJewel.YES;
-    private DoCrypto cryptoChoice = DoCrypto.YES;
+    private Strategy strategy = Strategy.FULL_AUTO;
+    private DoJewel jewelChoice = DoJewel.NO;
+    private DoCrypto cryptoChoice = DoCrypto.NO;
     private double driveDistance = 0.0;
     private double driveTime = 0.0;
     private double drivePower = 0.0;
@@ -192,24 +192,24 @@ public class FtcAuto extends FtcOpMode
 //                1.0, 50.0, 1.0, 1.0, "%.0f");
 //        FtcChoiceMenu<Alliance> allianceMenu = new FtcChoiceMenu<>("Alliance:", matchNumberMenu, robot);
         FtcChoiceMenu<Alliance> allianceMenu = new FtcChoiceMenu<>("Alliance:",null, robot);
-        FtcValueMenu delayMenu = new FtcValueMenu(
-                "Delay time:", allianceMenu, robot,
-                0.0, 30.0, 1.0, 0.0, " %.0f sec");
-        FtcChoiceMenu<StartPos> startPositionMenu = new FtcChoiceMenu<>("Start Position:", delayMenu, robot);
-        FtcChoiceMenu<Strategy> strategyMenu = new FtcChoiceMenu<>("Strategies:", startPositionMenu, robot);
+//        FtcValueMenu delayMenu = new FtcValueMenu(
+//                "Delay time:", allianceMenu, robot,
+//                0.0, 30.0, 1.0, 0.0, " %.0f sec");
+        FtcChoiceMenu<StartPos> startPositionMenu = new FtcChoiceMenu<>("Start Pos:", allianceMenu, robot);
+//        FtcChoiceMenu<Strategy> strategyMenu = new FtcChoiceMenu<>("Strategies:", startPositionMenu, robot);
 //        FtcChoiceMenu<DoJewel> jewelMenu = new FtcChoiceMenu<>("Do Jewel?", strategyMenu, robot);
 //        FtcChoiceMenu<DoCrypto> cryptoMenu = new FtcChoiceMenu<>("Do Crypto?", jewelMenu, robot);
-        FtcValueMenu driveDistanceMenu = new FtcValueMenu(
-                "Distance:", strategyMenu, robot,
-                -12.0, 12.0, 0.5, 4.0, " %.0f ft");
-        FtcValueMenu driveTimeMenu = new FtcValueMenu(
-                "Drive time:", strategyMenu, robot, 0.0, 30.0, 1.0, 5.0, " %.0f sec");
-        FtcValueMenu drivePowerMenu = new FtcValueMenu(
-                "Drive power:", strategyMenu, robot, -1.0, 1.0, 0.1, 0.5, " %.1f");
+//        FtcValueMenu driveDistanceMenu = new FtcValueMenu(
+//                "Distance:", strategyMenu, robot,
+//                -12.0, 12.0, 0.5, 4.0, " %.0f ft");
+//        FtcValueMenu driveTimeMenu = new FtcValueMenu(
+//                "Drive time:", strategyMenu, robot, 0.0, 30.0, 1.0, 5.0, " %.0f sec");
+//        FtcValueMenu drivePowerMenu = new FtcValueMenu(
+//                "Drive power:", strategyMenu, robot, -1.0, 1.0, 0.1, 0.5, " %.1f");
 
 //        matchNumberMenu.setChildMenu(allianceMenu);
-        delayMenu.setChildMenu(startPositionMenu);
-        driveTimeMenu.setChildMenu(drivePowerMenu);
+//        delayMenu.setChildMenu(startPositionMenu);
+//        driveTimeMenu.setChildMenu(drivePowerMenu);
 
         //
         // Populate choice menus.
@@ -219,17 +219,17 @@ public class FtcAuto extends FtcOpMode
 //        matchTypeMenu.addChoice("Semi-final", MatchType.SEMI_FINAL, false, matchNumberMenu);
 //        matchTypeMenu.addChoice("Final", MatchType.FINAL, false, matchNumberMenu);
 
-        allianceMenu.addChoice("Red", Alliance.RED_ALLIANCE, true, delayMenu);
-        allianceMenu.addChoice("Blue", Alliance.BLUE_ALLIANCE, false, delayMenu);
+        allianceMenu.addChoice("Red", Alliance.RED, true, startPositionMenu);
+        allianceMenu.addChoice("Blue", Alliance.BLUE, false, startPositionMenu);
 
-        startPositionMenu.addChoice("Near", StartPos.NEAR, true, strategyMenu);
-        startPositionMenu.addChoice("Far", StartPos.FAR, false, strategyMenu);
+        startPositionMenu.addChoice("Near", StartPos.NEAR, true, null);
+        startPositionMenu.addChoice("Far", StartPos.FAR, false, null);
 
 //        strategyMenu.addChoice("Full Auto", Strategy.FULL_AUTO, true, jewelMenu);
-        strategyMenu.addChoice("Full Auto", Strategy.FULL_AUTO, true);
-        strategyMenu.addChoice("Distance Drive", Strategy.DISTANCE_DRIVE, false, driveDistanceMenu);
-        strategyMenu.addChoice("Timed Drive", Strategy.TIMED_DRIVE, false, driveTimeMenu);
-        strategyMenu.addChoice("Do nothing", Strategy.DO_NOTHING, false);
+//        strategyMenu.addChoice("Full Auto", Strategy.FULL_AUTO, true);
+//        strategyMenu.addChoice("Distance Drive", Strategy.DISTANCE_DRIVE, false, driveDistanceMenu);
+//        strategyMenu.addChoice("Timed Drive", Strategy.TIMED_DRIVE, false, driveTimeMenu);
+//        strategyMenu.addChoice("Do nothing", Strategy.DO_NOTHING, false);
 
 //        jewelMenu.addChoice("Yes", DoJewel.YES, true, cryptoMenu);
 //        jewelMenu.addChoice("No", DoJewel.NO, false, cryptoMenu);
@@ -248,26 +248,26 @@ public class FtcAuto extends FtcOpMode
 //        matchType = matchTypeMenu.getCurrentChoiceObject();
 //        matchNumber = (int)matchNumberMenu.getCurrentValue();
         alliance = allianceMenu.getCurrentChoiceObject();
-        delay = delayMenu.getCurrentValue();
+//        delay = delayMenu.getCurrentValue();
         startPos = startPositionMenu.getCurrentChoiceObject();
-        strategy = strategyMenu.getCurrentChoiceObject();
+//        strategy = strategyMenu.getCurrentChoiceObject();
 //        jewelChoice = jewelMenu.getCurrentChoiceObject();
 //        cryptoChoice = cryptoMenu.getCurrentChoiceObject();
-        driveDistance = driveDistanceMenu.getCurrentValue();
-        driveTime = driveTimeMenu.getCurrentValue();
-        drivePower = drivePowerMenu.getCurrentValue();
+//        driveDistance = driveDistanceMenu.getCurrentValue();
+//        driveTime = driveTimeMenu.getCurrentValue();
+//        drivePower = drivePowerMenu.getCurrentValue();
         //
         // Show choices.
         //
 //        robot.dashboard.displayPrintf(1, "== Match: %s ==",
 //                matchType.toString() + "_" + matchNumber);
-        robot.dashboard.displayPrintf(2, "Auto Strategy: %s", strategyMenu.getCurrentChoiceText());
+//        robot.dashboard.displayPrintf(2, "Auto Strategy: %s", strategyMenu.getCurrentChoiceText());
         robot.dashboard.displayPrintf(3, "Alliance=%s,Delay=%.0f sec", alliance.toString(), delay);
         robot.dashboard.displayPrintf(4, "StartPos=%s", startPos.toString());
 //        robot.dashboard.displayPrintf(5, "DoJewel=%s,DoCrypto=%s",
 //                jewelChoice.toString(), cryptoChoice.toString());
-        robot.dashboard.displayPrintf(6, "Drive: distance=%.0f ft,Time=%.0f,Power=%.1f",
-                driveDistance, driveTime, drivePower);
+//        robot.dashboard.displayPrintf(6, "Drive: distance=%.0f ft,Time=%.0f,Power=%.1f",
+//                driveDistance, driveTime, drivePower);
     }   //doMenus
 
 }   //class FtcAuto

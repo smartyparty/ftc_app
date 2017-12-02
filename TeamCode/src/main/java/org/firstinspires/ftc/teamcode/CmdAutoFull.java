@@ -77,11 +77,11 @@ class CmdAutoFull implements TrcRobot.RobotCommand
     private static final String moduleName = "CmdAutoFull";
 
     private Robot robot;
-    private FtcAuto.Alliance alliance;
+    private Alliance alliance;
     private double delay;
-    private FtcAuto.StartPos startPos;
-    private FtcAuto.DoJewel doJewel;
-    private FtcAuto.DoCrypto doCrypto;
+    private StartPos startPos;
+    private DoJewel doJewel;
+    private DoCrypto doCrypto;
     private TrcEvent event;
     private TrcTimer timer;
     private TrcStateMachine<State> sm;
@@ -91,8 +91,8 @@ class CmdAutoFull implements TrcRobot.RobotCommand
     private RelicRecoveryVuMark vuMark;
 
     CmdAutoFull(
-            Robot robot, FtcAuto.Alliance alliance, double delay, FtcAuto.StartPos startPos,
-            FtcAuto.DoJewel doJewel, FtcAuto.DoCrypto doCrypto)
+            Robot robot, Alliance alliance, double delay, StartPos startPos,
+            DoJewel doJewel, DoCrypto doCrypto)
     {
         robot.tracer.traceInfo(
                 moduleName, "alliance=%s, delay=%.0f, startPos=%s, doJewel=%s, doCrypto=%s",
@@ -111,7 +111,7 @@ class CmdAutoFull implements TrcRobot.RobotCommand
         sm = new TrcStateMachine<>(moduleName);
 
         //Set start state here
-        sm.start(State.DEPLOY_JEWEL_ARM);
+        sm.start(State.DRIVE_TO_SAFE_ZONE);
         //sm.start(doJewel == FtcAuto.DoJewel.YES? State.DEPLOY_JEWEL_ARM: State.DO_DELAY);
     }   //CmdAutoFull
 
@@ -223,6 +223,7 @@ class CmdAutoFull implements TrcRobot.RobotCommand
 //                    break;
                 case DRIVE_TO_SAFE_ZONE:
                     //Path depends on start position and alliance
+                    SharedFunctions.driveToSafeZone(robot, alliance,startPos,RobotInfo.AUTO_PARKING_POWER);
 
                     //Set event to be signaled after specified amount of time
                     timer.set(0.5, event);
