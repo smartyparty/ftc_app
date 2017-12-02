@@ -54,13 +54,13 @@ public class JewelArm
     {
         this.instanceName = instanceName;
         verticalServo = new FtcServo("jewel_servo");
+        //verticalServo.setPhysicalRange(0,180);
+        //verticalServo.setLogicalRange(0.1,0.9);
 
         //Define the physical range of the HS485HB servo
         //Logical range will be 0 to 1 and scaled accordingly
         verticalServo.setInverted(false);
         verticalServo.setPosition(retractedPos);
-        //verticalServo.setPhysicalRange(0,180);
-        //verticalServo.setLogicalRange(0.1,0.9);
     }   //JewelArm
 
     public String toString()

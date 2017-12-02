@@ -111,7 +111,7 @@ class CmdAutoFull implements TrcRobot.RobotCommand
         sm = new TrcStateMachine<>(moduleName);
 
         //Set start state here
-        sm.start(State.DRIVE_TO_SAFE_ZONE);
+        sm.start(doJewel == DoJewel.YES ? State.DEPLOY_JEWEL_ARM : State.DRIVE_OFF_PLATFORM);
         //sm.start(doJewel == FtcAuto.DoJewel.YES? State.DEPLOY_JEWEL_ARM: State.DO_DELAY);
     }   //CmdAutoFull
 
@@ -149,7 +149,7 @@ class CmdAutoFull implements TrcRobot.RobotCommand
                     //Set event to be signaled after specified amount of time
                     timer.set(0.5, event);
                     //State machine will wait for event to be signaled, then move to next state
-                    sm.waitForSingleEvent(event, State.RETRACT_JEWEL_ARM);
+                    sm.waitForSingleEvent(event, State.DETECT_JEWEL_COLOR);
                     break;
                 case DETECT_JEWEL_COLOR:
                     //Disable the jewel color sensor trigger, we're done with it
@@ -180,20 +180,12 @@ class CmdAutoFull implements TrcRobot.RobotCommand
                     //If we get here, we either have a color, or we have exceeded our retry count
                     if (jewelColor != Robot.ObjectColor.NO) {
                         //Displace the jewel if we detected a color
-                        sm.waitForSingleEvent(event, State.DISPLACE_JEWEL);
-                    } else {
                         //retract jewel arm
                         robot.jewelArm.setExtended(false);
-                        //proceed to safe zone
-                        sm.waitForSingleEvent(event, State.DRIVE_TO_SAFE_ZONE);
+
+                        //TODO: Displace jewel using timed drive in proper direction]
+                        SharedFunctions.displaceJewel(robot,jewelColor,alliance,RobotInfo.JEWEL_DISPLACEMENT_DRIVE_POWER, RobotInfo.JEWEL_DISPLACEMENT_DRIVE_TIME);
                     }
-                    break;
-                case DISPLACE_JEWEL:
-                    //retract jewel arm
-                    robot.jewelArm.setExtended(false);
-
-                    //TODO: Displace jewel using timed drive in proper direction
-
                     //Set event to be signaled after specified amount of time
                     timer.set(0.5, event);
                     //Park in safe zone

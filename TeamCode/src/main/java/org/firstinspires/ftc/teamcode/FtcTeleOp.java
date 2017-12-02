@@ -165,7 +165,7 @@ public class FtcTeleOp extends FtcOpMode implements TrcGameController.ButtonHand
         dashboard.displayPrintf(3, "jewel=%.2f",
                 robot.jewelArm.getPosition());
 
-        dashboard.displayPrintf(4, "d=%.2f,a=%.2f,r=%.2f,g=%.2f,b=%.2f,h=%.2f,s=%.2f,v=%.2f,cn=%f,col=%s",
+        dashboard.displayPrintf(4, "d=%.2f,a=%.2f,r=%.2f,g=%.2f,b=%.2f",
                 robot.jewelDistanceSensor.getRawData(0, FtcDistanceSensor.DataType.DISTANCE_CM).value,
                 robot.jewelColorSensor.getRawData(0, FtcColorSensor.DataType.ALPHA).value,
                 robot.jewelColorSensor.getRawData(0, FtcColorSensor.DataType.RED).value,
@@ -269,6 +269,8 @@ public class FtcTeleOp extends FtcOpMode implements TrcGameController.ButtonHand
                 case FtcGamepad.GAMEPAD_X:
                     if (pressed)
                     {
+                        //just to test arm deployment
+                        robot.jewelArm.setExtended(true);
 //                        robot.jewelColorTrigger.setEnabled(true);
 //                        robot.jewelArm.setExtended(true);
 //
@@ -303,7 +305,8 @@ public class FtcTeleOp extends FtcOpMode implements TrcGameController.ButtonHand
 
                 case FtcGamepad.GAMEPAD_Y:
                     if (pressed) {
-//                        robot.jewelArm.setExtended(false);
+                        //just to test arm deployment
+                        robot.jewelArm.setExtended(false);
                     }
                     break;
 

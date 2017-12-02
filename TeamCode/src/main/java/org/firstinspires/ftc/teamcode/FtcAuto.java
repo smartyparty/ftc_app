@@ -94,7 +94,7 @@ public class FtcAuto extends FtcOpMode
     private double delay = 0.0;
     private StartPos startPos = StartPos.NEAR;
     private Strategy strategy = Strategy.FULL_AUTO;
-    private DoJewel jewelChoice = DoJewel.NO;
+    private DoJewel jewelChoice = DoJewel.YES;
     private DoCrypto cryptoChoice = DoCrypto.NO;
     private double driveDistance = 0.0;
     private double driveTime = 0.0;
@@ -197,7 +197,7 @@ public class FtcAuto extends FtcOpMode
 //                0.0, 30.0, 1.0, 0.0, " %.0f sec");
         FtcChoiceMenu<StartPos> startPositionMenu = new FtcChoiceMenu<>("Start Pos:", allianceMenu, robot);
 //        FtcChoiceMenu<Strategy> strategyMenu = new FtcChoiceMenu<>("Strategies:", startPositionMenu, robot);
-//        FtcChoiceMenu<DoJewel> jewelMenu = new FtcChoiceMenu<>("Do Jewel?", strategyMenu, robot);
+        FtcChoiceMenu<DoJewel> jewelMenu = new FtcChoiceMenu<>("Do Jewel?", startPositionMenu, robot);
 //        FtcChoiceMenu<DoCrypto> cryptoMenu = new FtcChoiceMenu<>("Do Crypto?", jewelMenu, robot);
 //        FtcValueMenu driveDistanceMenu = new FtcValueMenu(
 //                "Distance:", strategyMenu, robot,
@@ -222,8 +222,8 @@ public class FtcAuto extends FtcOpMode
         allianceMenu.addChoice("Red", Alliance.RED, true, startPositionMenu);
         allianceMenu.addChoice("Blue", Alliance.BLUE, false, startPositionMenu);
 
-        startPositionMenu.addChoice("Near", StartPos.NEAR, true, null);
-        startPositionMenu.addChoice("Far", StartPos.FAR, false, null);
+        startPositionMenu.addChoice("Near", StartPos.NEAR, true, jewelMenu);
+        startPositionMenu.addChoice("Far", StartPos.FAR, false, jewelMenu);
 
 //        strategyMenu.addChoice("Full Auto", Strategy.FULL_AUTO, true, jewelMenu);
 //        strategyMenu.addChoice("Full Auto", Strategy.FULL_AUTO, true);
@@ -231,8 +231,8 @@ public class FtcAuto extends FtcOpMode
 //        strategyMenu.addChoice("Timed Drive", Strategy.TIMED_DRIVE, false, driveTimeMenu);
 //        strategyMenu.addChoice("Do nothing", Strategy.DO_NOTHING, false);
 
-//        jewelMenu.addChoice("Yes", DoJewel.YES, true, cryptoMenu);
-//        jewelMenu.addChoice("No", DoJewel.NO, false, cryptoMenu);
+        jewelMenu.addChoice("Yes", DoJewel.YES, true, null);
+        jewelMenu.addChoice("No", DoJewel.NO, false, null);
 
 //        cryptoMenu.addChoice("Yes", DoCrypto.YES, true);
 //        cryptoMenu.addChoice("No", DoCrypto.NO, false);
